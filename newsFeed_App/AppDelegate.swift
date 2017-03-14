@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  newsFeed_App
 //
-//  Created by Danyal Aboobakar on 14/03/2017.
+//  Created by Danyal Aboobakar on 08/03/2017.
 //  Copyright © 2017 Danyal Aboobakar. All rights reserved.
 //
 
