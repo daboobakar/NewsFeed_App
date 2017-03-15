@@ -7,5 +7,6 @@ target 'newsFeed_App' do
 
   # Pods for newsFeed_App
   pod 'Alamofire'
+  pod 'PINRemoteImage', '~> 2.1' 
 
 end
