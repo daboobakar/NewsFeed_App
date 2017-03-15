@@ -16,14 +16,15 @@ class MasterViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = "News"
         // Do any additional setup after loading the view, typically from a nib.
-        self.navigationItem.leftBarButtonItem = self.editButtonItem
-        
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(insertNewObject(_:)))
-        self.navigationItem.rightBarButtonItem = addButton
+//        self.navigationItem.leftBarButtonItem = self.editButtonItem
+//        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(insertNewObject(_:)))
+//        self.navigationItem.rightBarButtonItem = addButton
         if let split = self.splitViewController {
             let controllers = split.viewControllers
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+            
         }
     }
     
@@ -98,14 +99,40 @@ class MasterViewController: UITableViewController {
         return articles.count
     }
     
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         let article = articles[indexPath.row]
         cell.textLabel!.text = article.headline
+        cell.textLabel?.font = UIFont(name: "Baskerville-Bold", size: 14)
+        cell.textLabel?.numberOfLines = 4
+        
         cell.detailTextLabel?.text = article.section
+        cell.detailTextLabel?.font = UIFont(name: "AvenirNext-Italic", size: 12)
 //                cell.detailTextLabel?.text = article.authorNames.joined(separator: ", ")
-        //        TODO: set cell.imageview to display image at gist.ownerAvatarURL
+        //set image to nil in case cell is being reused
+        cell.imageView?.image = nil
+        
+        //check we have urlString for image
+        if let urlString = article.imageURL {
+            independentAPIManager.sharedInstance.imageFrom(urlString: urlString) {
+                //check if errors exist, if so print error
+                (image, error) in
+                guard error == nil else {
+                    print(error!)
+                    return
+                }
+                //set cell's image if no error exists
+                if let cellToUpdate = self.tableView?.cellForRow(at: indexPath) {
+                    
+                    cellToUpdate.imageView?.image = image // will work fine even if image is nil
+                    //need to reload the view, which won't happen otherwise
+                    // since this is in an async call
+                    cellToUpdate.setNeedsLayout()
+                }
+            }
+        }
         return cell
     }
     

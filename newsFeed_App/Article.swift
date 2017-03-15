@@ -14,6 +14,8 @@ class Article {
     var section: String?
     var authorNames: [String] = []
     var url: String?
+    var imageURL: String?
+    
     required init() {
         
     }
@@ -30,6 +32,10 @@ class Article {
         self.id = idValue
         self.url = url
         self.section = section
+        
+        if let ownerJson = json["image"] as? [String: Any] {
+            self.imageURL = ownerJson["thumbnail"] as? String
+        }
         
         if let authorsJson = json["authors"] as? [[String: Any]] {
             for item in authorsJson {

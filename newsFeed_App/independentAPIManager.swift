@@ -38,11 +38,30 @@ class independentAPIManager {
         }
     }
     
+    
+    //obtain urlString for image and use it to make GET request & result is turned into image
+    func imageFrom(urlString: String, completionHandler: @escaping (UIImage?, Error?) -> Void) {
+        let _ = Alamofire.request(urlString)
+            .response { dataResponse in
+                // use the generic response serializer that returns Data
+                guard let data = dataResponse.data else {
+                    completionHandler(nil, dataResponse.error)
+                    return
+                }
+                
+                let image = UIImage(data: data)
+                completionHandler(image, nil)
+        }
+    }
+    
+    
     private func articleArrayFromResponse(response: DataResponse<Any>) -> Result<[Article]> {
         guard response.result.error == nil else {
             print(response.result.error!)
             return .failure(independentAPIManagerError.network(error: response.result.error!))
         }
+        
+        //Error Handling
         
         // make sure we got JSON and it's a dictionary
         guard let jsonTopLevelDictionary = response.result.value as? [String: Any] else {
@@ -55,6 +74,8 @@ class independentAPIManager {
             return .failure(independentAPIManagerError.objectSerialization(reason:
                 "Did not get JSON dictionary in response"))
         }
+        
+        
         
         // turn JSON in to article objects
         var articles = [Article]()
