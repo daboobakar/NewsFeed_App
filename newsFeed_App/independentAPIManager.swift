@@ -21,6 +21,11 @@ class independentAPIManager {
     
     static let sharedInstance = independentAPIManager()
     
+    func clearCache() -> Void {
+        let cache = URLCache.shared
+        cache.removeAllCachedResponses()
+    }
+    
     func printArticles() -> Void {
         Alamofire.request(articleRouter.getArticles())
             .responseString { response in
@@ -85,35 +90,5 @@ class independentAPIManager {
             }
         }
         return .success(articles)
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-//        // check for "message" errors in the JSON because this API does that
-//        if let jsonDictionary = response.result.value as? [String: Any],
-//            let errorMessage = jsonDictionary["message"] as? String {
-//            return .failure(independentAPIManagerError.apiProvidedError(reason: errorMessage))
-//        }
-//        
-//        // make sure we got JSON and it's an array
-//        guard let jsonArray = response.result.value as? [[String: Any]] else {
-//            print("didn't get array of articles object as JSON from API")
-//            return .failure(independentAPIManagerError.objectSerialization(reason:
-//                "Did not get JSON dictionary in response"))
-//        }
-//        // turn JSON into gists
-//        var articles = [Article]()
-//        for item in jsonArray {
-//            if let article = Article(json: item) {
-//                articles.append(article)
-//            }
-//        }
-//        return .success(articles)
     }
 }

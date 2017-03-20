@@ -10,8 +10,9 @@ import Foundation
 import Alamofire
 
 enum articleRouter: URLRequestConvertible {
+    //   https:newsapi.org/v1/articles?source=independent&sortBy=top&apiKey=2302a94e1ff847608f9036c670923fc6
+
     static let baseURLString = "http://www.independent.co.uk/"
-    
     case getArticles()
     
     func asURLRequest() throws -> URLRequest {

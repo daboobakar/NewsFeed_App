@@ -13,11 +13,12 @@ class MasterViewController: UITableViewController {
     
     var detailViewController: DetailViewController? = nil
     var articles = [Article]()
+    var dateFormatter = DateFormatter()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "News"
+        self.title = "Top Stories"
         if let split = self.splitViewController {
             let controllers = split.viewControllers
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
@@ -30,9 +31,32 @@ class MasterViewController: UITableViewController {
         loadArticles()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        self.clearsSelectionOnViewWillAppear = self.splitViewController!.isCollapsed
+        
+        // add refresh control for pull to refresh
+        if (self.refreshControl == nil) {
+            self.refreshControl = UIRefreshControl()
+            self.refreshControl?.addTarget(self,
+                                           action: #selector(refresh(sender:)),
+                                           for: .valueChanged)
+//            self.dateFormatter.dateStyle = .short
+            self.dateFormatter.timeStyle = .medium
+        }
+        
+        super.viewWillAppear(animated)
+    }
+    
     func loadArticles() {
         independentAPIManager.sharedInstance.fetchArticles() {
             result in
+            
+            // tell refresh control it can stop showing up now
+            if self.refreshControl != nil,
+                self.refreshControl!.isRefreshing {
+                self.refreshControl?.endRefreshing()
+            }
+            
             guard result.error == nil else {
                 self.handleLoadArticlesError(result.error!)
                 return
@@ -40,21 +64,26 @@ class MasterViewController: UITableViewController {
             if let fetchedArticles = result.value {
                 self.articles = fetchedArticles
             }
+            
+            let now = Date()
+            let updateString = "Last Updated at " + self.dateFormatter.string(from: now)
+            self.refreshControl?.attributedTitle = NSAttributedString(string: updateString)
+            
             self.tableView.reloadData()
         }
         
-        self.tableView.reloadData()
+    }
+    
+    // MARK: - Pull to Refresh
+    func refresh(sender: Any) {
+        independentAPIManager.sharedInstance.clearCache()
+        loadArticles()
     }
     
     func handleLoadArticlesError(_ error: Error) {
         // TODO: show error
     }
     
-    
-    override func viewWillAppear(_ animated: Bool) {
-        self.clearsSelectionOnViewWillAppear = self.splitViewController!.isCollapsed
-        super.viewWillAppear(animated)
-    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
